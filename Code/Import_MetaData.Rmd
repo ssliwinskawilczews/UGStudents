@@ -45,9 +45,7 @@ library(googlesheets4)
 Project <- "UGStudents"
 DataOut <- file.path("..","Data", "ImportedData", "ImportedMetaData")
 
-FigPath <- file.path("..", "Output", "Figures")
-# FigRdsPath <- file.path("..", "Output", "FiguresRds")
-# TableRdsPath <- file.path("..", "Output", "TablesRDS")
+
 ```
 
 # Import MetaData 
@@ -81,7 +79,7 @@ JuliaDataMeta <- CultureCatalog %>%
   
   group_by(Strain, E_days) %>%
 
-summarize(ID, SampleID, Strain, Experiment, Genera, Phylum, OD, N, ObsDate, StartDate, E_days,
+summarize(ID, SampleID, Strain, Strain_group, Genera, Phylum, OD, N, ObsDate, StartDate, E_days,
   meanOD = mean(OD), sdOD = sd(OD),
   meanN = mean(N), sdN = sd(N)) %>%
 
@@ -211,151 +209,50 @@ JuliaDataMeta %>%
   ggh4x::facet_nested(cols = vars(E_days)) +
   theme_bw()
 ```
-
-
-```{r Create plot, fig.height = 8, fig.width = 8}
-
+```{r}
 JuliaDataMeta %>%
-  filter(E_days == 7 | E_days == 14) %>% 
-  #filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
   ggplot() +
-  geom_point(aes(x = E_days, y = meanOD, colour=as.factor(Genera)), size = 3.5, alpha = 0.9, show.legend = T) +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
   # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = E_days, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
-  ggh4x::facet_nested(cols = vars(Experiment), rows = vars(Phylum)) +
-  theme_bw() +
-    theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        #legend.position = c(0.12,0.80),
-        legend.text = element_text(size=10))
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days), rows = vars(Strain_group)) +
+  theme_bw()
+
 ```
 
 
 
-```{r Create plot, fig.height = 8, fig.width = 6}
 
+```{r}
 JuliaDataMeta %>%
-  filter(E_days == 7) %>% 
-  #filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
+  filter(E_days == 6 | E_days == 7) %>% 
   ggplot() +
-  geom_point(aes(x = Experiment, y = meanOD, colour=as.factor(Genera)), size = 3.5, alpha = 0.9, show.legend = T) +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
   # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Experiment, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
-  ggh4x::facet_nested(cols = vars(E_days), rows = vars(Phylum)) +
-  theme_bw() +
-    theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.12,0.80),
-        legend.text = element_text(size=10))
-```
-
-# Save plot 
-
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_7",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(Genera), rows = vars(E_days, Phylum)) +
+  theme_bw()
 ```
 
 
-```{r, Create plot, fig.height = 8, fig.width = 6}
-JuliaDataMeta %>%
-  filter(E_days == 14) %>% 
-  #filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
-  ggplot() +
-  geom_point(aes(x = Experiment, y = meanOD, colour=as.factor(Genera)), size = 3.5, alpha = 0.9, show.legend = T) +
-  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Experiment, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
-  ggh4x::facet_nested(cols = vars(E_days), rows = vars(Phylum)) +
-  theme_bw() +
-    theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.12,0.90),
-        legend.text = element_text(size=10))
-
-
+```{r}
 
 ```
-# Save plot 
 
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
-```
 
-```{r Create plot, fig.height = 8, fig.width = 6}
-JuliaDataMeta %>%
-  filter(E_days == 7 | E_days == 14) %>% 
-  #filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
-  ggplot() +
-  geom_point(aes(x = Experiment, y = meanOD, colour=as.factor(Genera)), size = 3.5, alpha = 0.9, show.legend = T) +
-  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
-  geom_errorbar(aes(x = Experiment, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
-  ggh4x::facet_nested(cols = vars(E_days), rows = vars(Phylum)) +
-  theme_bw() +
-    theme(panel.grid.minor = element_blank(),
-        panel.grid.major = element_blank(),
-        panel.spacing.x = unit(0.4, 'cm'),
-        axis.text = element_text(size=12),
-        axis.text.x = element_text(size=12),
-        axis.title = element_text(size=16),
-        strip.background = element_rect(fill="white"),
-        strip.text = element_text(size=12),
-        axis.title.y = element_text(margin=margin(r=10)),
-        axis.title.x = element_text(margin=margin(t=10)),
-        legend.background = element_rect(fill="transparent"),
-        legend.key = element_blank(),
-        legend.title = element_blank(),
-        legend.position = c(0.12,0.80),
-        legend.text = element_text(size=10))
-```
-
-# Save plot 
-
-```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_7_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
-```
 
 # Save rds for further analysis
 
 ```{r save rds}
-saveRDS(object = JuliaDataMeta, file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "JuliaExp.Rds"), compress = "xz")
+saveRDS(object = CultureCatalog, file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"), compress = "xz")
 ```
 
 # Variable names used in Data Dictionary
 
 ```{r}
-colnames(JuliaDataMeta)
+colnames(CultureCatalog)
 ```
 
 
