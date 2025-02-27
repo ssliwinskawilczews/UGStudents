@@ -1,0 +1,240 @@
+---
+title: "Import_MetaData"
+author:
+- Sylwia Sliwinska-Wilczewska
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+
+Import_MetaData.Rmd imports culture MetaData Catalog from a google sheet 
+
+# Load Libraries and set Project Variables
+
+```{r load libraries, warning = FALSE, echo=FALSE}
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(data.table)
+library(googledrive)
+library(googlesheets4)
+```
+
+```{r set project variables, warning = FALSE, echo=FALSE}
+#"..", takes up a level in the directory path
+Project <- "UGStudents"
+DataOut <- file.path("..","Data", "ImportedData", "ImportedMetaData")
+
+
+```
+
+# Import MetaData 
+
+```{r load Catalog direct from googlesheet, results = "hide", warning = FALSE, echo=FALSE}
+gs4_deauth()
+# this is the URL or ID of a Sheet readable by anyone (with a link)
+CultureCatalog <- read_sheet("https://docs.google.com/spreadsheets/d/1erH31l08CzHM8I8y5ox_ENy8NMnP2yph8PivWBQEZrA/edit?gid=886344930#gid=886344930") 
+
+```
+
+Calculate E_days
+```{r}
+CultureCatalog <- CultureCatalog %>%
+  # mutate(ObsDate = as.Date(ObsDate)) %>% 
+  # mutate(StartDate = as.Date(StartDate)) %>% 
+  
+group_by(ID) %>%
+  arrange(ObsDate) %>%
+  mutate(E_days = as.numeric((ObsDate - StartDate[1]))) %>%
+ungroup()  
+```
+
+Calculate mean
+```{r}
+#colnames(JuliaData)
+
+JuliaDataMeta <- CultureCatalog %>%
+  #mutate(OD = as.numeric(OD)) %>% 
+  #filter(N>0) %>% 
+  
+  group_by(Strain, E_days) %>%
+
+summarize(ID, SampleID, Strain, Genera, Phylum, OD, N, ObsDate, StartDate, E_days,
+  meanOD = mean(OD), sdOD = sd(OD),
+  meanN = mean(N), sdN = sd(N)) %>%
+
+ungroup() 
+```
+
+
+Create prelim plot
+```{r}
+JuliaDataMeta %>%
+  filter(E_days != 0) %>%
+  filter(Strain == "K_9" | Strain == "UI_9" | Strain == "UL_9") %>%
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_10" | Strain == "UI_10" | Strain == "UL_10") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_14" | Strain == "UI_14" | Strain == "UL_14") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_15" | Strain == "UI_15" | Strain == "UL_15") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_69" | Strain == "UI_69" | Strain == "UL_69") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_112" | Strain == "UI_112" | Strain == "UL_112") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_5" | Strain == "UI_5" | Strain == "UL_5") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_40" | Strain == "UI_40" | Strain == "UL_40") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_51" | Strain == "UI_51" | Strain == "UL_51") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_81" | Strain == "UI_81" | Strain == "UL_81") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>%
+  filter(Strain == "K_106" | Strain == "UI_106" | Strain == "UL_106") %>%
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+
+JuliaDataMeta %>%
+  filter(E_days != 0) %>% 
+  filter(Strain == "K_233" | Strain == "UI_233" | Strain == "UL_233") %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(E_days)) +
+  theme_bw()
+```
+```{r}
+JuliaDataMeta %>%
+  filter(E_days == 6 | E_days == 7) %>% 
+  ggplot() +
+  geom_point(aes(x = Strain, y = meanOD), size = 3.5, alpha = 0.9, show.legend = T) +
+  # geom_line(aes(x = WLNum, y = deltaOD_Lmu_corr, linetype=as.factor(O2)), size = 1, alpha = 0.9, show.legend = T) +
+  geom_errorbar(aes(x = Strain, ymin = meanOD - sdOD, ymax = meanOD + sdOD), width=0, size=0.3, show.legend = F) +
+  ggh4x::facet_nested(cols = vars(Genera), rows = vars(E_days, Phylum)) +
+  theme_bw()
+```
+
+
+
+
+
+# Save rds for further analysis
+
+```{r save rds}
+saveRDS(object = CultureCatalog, file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "CultureCatalog.Rds"), compress = "xz")
+```
+
+# Variable names used in Data Dictionary
+
+```{r}
+colnames(CultureCatalog)
+```
+
+
+
