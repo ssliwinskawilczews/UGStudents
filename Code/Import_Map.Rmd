@@ -1,0 +1,221 @@
+---
+title: "Marcelina"
+author:
+- Sylwia Sliwinska-Wilczewska
+date: "`r format(Sys.Date())`"
+output:
+bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    toc: TRUE
+    toc_float: TRUE
+    toc_depth: 6
+    fig_caption: yes
+bibliography: BalticPhotoperiod.bib
+csl: plos-one.csl
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Figs/')
+```
+
+# Introduction
+Marcelina.Rmd create map and related plots
+
+# Load Libraries and set Project Variables
+
+```{r load libraries} 
+library(lubridate)
+library(stringr)
+library(broom)
+library(knitr)
+library(OneR)
+library(zoo)
+library(ggpubr)
+library(data.table)
+library(googledrive)
+library(googlesheets4)
+library(tidyverse)
+library("patchwork") # merging plots
+library(ggforce) # circle :)
+
+#library(highcharter)
+library(maps)
+
+```
+# Set Project Variables
+
+```{r set project variables}
+Project <- "UGStudents"
+DataOut <- file.path("..","Data", "ImportedData", "ImportedMetaData")
+
+FigPath <- file.path("..", "Output", "Figures")
+RDSTablePath <- file.path("..", "Output", "TablesRDS")
+```
+
+----------------------------------------Create map ----------------------------------------------
+
+
+# Create map
+https://www.geeksforgeeks.org/how-to-make-world-map-with-ggplot2-in-r/
+
+```{r create GrowthCurve plot, fig.height = 4, fig.width = 6, warning = FALSE}
+data_textA <- data.frame(label = c('A'))
+# data_textGrowth <- data.frame(label = c("µ>~4~d^{-1}"))
+circles <- data.frame(x0 = 30, y0 = 30, r = 10)
+
+
+d=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+#d2=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(90), y2=c(66))
+
+world_coordinates <- map_data("world") 
+world_coordinates$facetsPhotoperiod24 <- c('italic(Ulva)~sp.~blooms~2007~-~2024')
+Map24<-ggplot() + 
+  geom_map(data = world_coordinates, map = world_coordinates, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
+  #geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "gold1", color="gold1", alpha=0.5) +
+  geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.3) +
+  #geom_rect(data=d2, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.5) +
+  #geom_text(data=data_textA, aes(x=-190, y=80, label=label), size=8) +
+  # geom_circle(aes(x0 = x0, y0 = y0, r = r), data = circles) +
+  # geom_text(data=data_textGrowth, aes(x=-150, y=-66, label=label), size=5, parse=TRUE) +
+  
+  labs(y = "Latitude", x = "Longitude") +
+  ggh4x::facet_nested(cols = vars(facetsPhotoperiod24), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text = element_text(size=14),
+        axis.title = element_text(size=18),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=14),
+        axis.title.y = element_text(margin=margin(r=10)),
+        # axis.title.x = element_text(margin=margin(t=10)),
+        #axis.title.x = element_blank(),
+        legend.background = element_rect(fill="transparent"),
+        legend.position = c(0.12,0.76),
+        legend.key.height= unit(0.005, 'cm'),
+        legend.spacing.x = unit(0.01, 'cm'),
+        legend.text = element_text(size=14))
+Map24
+```
+
+
+```{r save plot}
+#ggsave(file = file.path(FigPath, paste("Fig_Map",".png",sep = "")), height=8, width= 12,  dpi = 300, limitsize = TRUE)
+```
+
+
+----------------------------------------------------------
+
+```{r}
+world <- map_data("world")
+head(world)
+```
+
+https://stackoverflow.com/questions/51350763/borders-and-colors-on-world-map-ggplot2
+
+```{r}
+d=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+worldGB<-world %>% 
+  filter(region == "China" | region == "Japan" | region == "South Korea" | region == "India" |
+         region == "France" | region == "Scotland" | region == "Italy" | region == "Portugal" |
+           region == "Finland" | region == "Netherlands" | region == "Ireland" | region == "South Africa" |
+           region == "Egypt" | region == "USA" | region == "New Caledonia" |
+           region == "Mexico" | region == "Argentina" | region == "Sweden" |region == "Germany" |region == "Australia" | region == "Brazil" | region == "Ghana" | region == "Poland")
+
+world <- map_data("world")
+
+worldplot <- ggplot() +
+  geom_polygon(data = world, aes(x=long, y = lat, group = group), color = "gray80", fill = "gray80") + 
+
+  #geom_map(data = world, map = world, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
+  #cadetblue4
+  
+    geom_polygon(data = worldGB, aes(x=long, y = lat, group = group), fill = "aquamarine4") + 
+    geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "White", color="White", alpha=0.3) +
+
+  
+    #geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.3) +
+  coord_fixed(1.3) +
+  labs(y = "Latitude", x = "Longitude") +
+  #ggh4x::facet_nested(cols = vars(facetsPhotoperiod24), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text = element_text(size=14),
+        axis.title = element_text(size=18),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=14),
+        axis.title.y = element_text(margin=margin(r=10)),
+        # axis.title.x = element_text(margin=margin(t=10)),
+        #axis.title.x = element_blank(),
+        legend.background = element_rect(fill="transparent"),
+        legend.position = c(0.12,0.76),
+        legend.key.height= unit(0.005, 'cm'),
+        legend.spacing.x = unit(0.01, 'cm'),
+        legend.text = element_text(size=14))
+worldplot
+
+```
+
+
+```{r}
+d=data.frame(x1=c(-Inf), x2=c(Inf), y1=c(-Inf), y2=c(Inf))
+
+worldGB<-world %>% 
+  filter(region == "USA" | region == "Japan" | region == "Canada" | region == "Poland" |
+         region == "Germany" | region == "Norway")
+
+world <- map_data("world")
+
+worldplot <- ggplot() +
+
+  geom_polygon(data = world, aes(x=long, y = lat, group = group), color = "white", fill = "darkkhaki") + 
+        geom_polygon(data = worldGB, aes(x=long, y = lat, group = group), fill = "darkslategray", alpha = 0.5) + 
+  #geom_map(data = world, map = world, aes(long, lat, map_id = region), color = "white", fill = "gray50", size = 0.2) +
+  #cadetblue4
+    #geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "White", color="White", alpha=0.3) +
+      geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.3) +
+    #geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=y1, ymax=y2), fill = "lightskyblue1", color="lightskyblue3", alpha=0.3) +
+  coord_fixed(1.3) +
+  labs(y = "Latitude", x = "Longitude") +
+  #ggh4x::facet_nested(cols = vars(facetsPhotoperiod24), labeller = label_parsed) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_blank(),
+        axis.text = element_text(size=14),
+        axis.title = element_text(size=18),
+        strip.background = element_rect(fill="white"),
+        strip.text = element_text(size=14),
+        axis.title.y = element_text(margin=margin(r=10)),
+        # axis.title.x = element_text(margin=margin(t=10)),
+        #axis.title.x = element_blank(),
+        legend.background = element_rect(fill="transparent"),
+        legend.position = c(0.12,0.76),
+        legend.key.height= unit(0.005, 'cm'),
+        legend.spacing.x = unit(0.01, 'cm'),
+        legend.text = element_text(size=14))
+worldplot
+
+```
+
+
+```{r save plot}
+ggsave(file = file.path(FigPath, paste("Fig_Marcelina_Map",".png",sep = "")), height=8, width= 12,  dpi = 300, limitsize = TRUE)
+```
+
+
+# Save rds for further analysis
+
+```{r save rds}
+saveRDS(object = JuliaDataMeta, file = file.path("..", "Data", "ImportedData", "ImportedMetaData", "MarcelinaExp.Rds"), compress = "xz")
+```
+
+

@@ -1,5 +1,5 @@
 ---
-title: "Import_MetaData"
+title: "Julia"
 author:
 - Sylwia Sliwinska-Wilczewska
 date: "`r format(Sys.Date())`"
@@ -27,7 +27,7 @@ knitr::opts_chunk$set(fig.path='Figs/')
 
 # Introduction
 
-Import_MetaData.Rmd imports culture MetaData Catalog from a google sheet 
+Julia.Rmd imports culture MetaData Catalog from a google sheet 
 
 # Load Libraries and set Project Variables
 
@@ -274,7 +274,7 @@ JuliaDataMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_7",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_Julia_Growth_7",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 
@@ -310,7 +310,7 @@ JuliaDataMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_Julia_Growth_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 ```{r Create plot, fig.height = 8, fig.width = 6}
@@ -343,7 +343,7 @@ JuliaDataMeta %>%
 # Save plot 
 
 ```{r save plot}
-ggsave(file = file.path(FigPath, paste("Fig_Growth_7_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
+ggsave(file = file.path(FigPath, paste("Fig_Julia_Growth_7_14",".png",sep = "")), height=6, width= 6,  dpi = 300, limitsize = TRUE)
 ```
 
 # Save rds for further analysis
